@@ -1,6 +1,7 @@
 import urllib.request
 import glob
 import os
+import json
 
 def getPath():
     path = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname("GOL.py")))
@@ -33,9 +34,14 @@ def getImports():
     for i in range(0,len(pyText)):
         if pyText[i] == "import":
             temp = cleanImport(i,pyText)
-            print(temp)
-            imports.append(temp)
+            imports.append(combineImport(temp))
     return imports
+
+def combineImport(imp):
+    res = ""
+    for i in imp:
+        res = res + i + " "
+    return res
 
 #assumes  is a docstring and is closed at the otherside
 def getDocString(i,pyText):
@@ -56,7 +62,6 @@ def getDocStrings():
             i = i + len(docString) + 1
             docStrings.append(docString)
         i = i + 1
-    print(docStrings)
     return docStrings
     
 
@@ -73,11 +78,24 @@ def getFunctionNames():
     for i in range(0,len(pyText)):
         if pyText[i] == "def":
             functions.append(cleanFunctionName(pyText[i + 1]))
-    print(functions)
     return functions
 
 
+def writeToJSON():
+    data = {}
+    data['functions'] = []
+    data['functions'].append({
+        'functions' : getFunctionNames()})
+    
+    data['imports'] = []
+    data['imports'].append({
+        'imports' : getImports()})
+    data['docString'] = []
+    data['docString'].append({
+        'docString' : getDocStrings()})
+    
+    with open('data.txt', 'w') as outfile:
+        json.dump(data, outfile)
+    
 
-getImports()
-getDocStrings()
-getFunctionNames()
+writeToJSON()
