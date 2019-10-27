@@ -34,23 +34,23 @@ def getImports():
     for i in range(0,len(pyText)):
         if pyText[i] == "import":
             temp = cleanImport(i,pyText)
-            imports.append(combineImport(temp))
+            imports.append(listToString(temp))
     return imports
 
-def combineImport(imp):
+def listToString(imp):
     res = ""
     for i in imp:
         res = res + i + " "
     return res
 
 #assumes  is a docstring and is closed at the otherside
-def getDocString(i,pyText):
+def getDocString(i,pyText,quotes):
     endOfText = len(pyText) - 1
     temp = pyText[i + 1 : endOfText]
     for j in range(0, endOfText):
-        if temp[j] == '"""':
-            return temp[0:j]
-    return []
+        if temp[j] == quotes:
+            return listToString(temp[0:j])
+    return ''
         
 def getDocStrings():
     pyText = getContents()
@@ -58,9 +58,13 @@ def getDocStrings():
     i = 0
     while i < len(pyText):
         if pyText[i] == '"""':
-            docString = getDocString(i,pyText)
+            docString = getDocString(i,pyText,'"""')
             i = i + len(docString) + 1
             docStrings.append(docString)
+        if pyText[i] == "'''":
+            docString = getDocString(i,pyText,"'''")
+            i = i + len(docString) + 1
+            docStrings.append(docString)        
         i = i + 1
     return docStrings
     
