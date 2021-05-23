@@ -6,26 +6,39 @@ sys.path.append(path)
 
 import xtract_python_main as xpm
 
-class FunctionExtractionTests(unittest.TestCase):
-    def single_line(self):
-        with open('single_line_expected.txt') as file:
+class xtract_python_main_tests(unittest.TestCase):
+    def get_functions_test(self):
+        with open('get_functions_single_line.txt') as file:
             expected = file.read()
             output = str(xpm.get_functions(xpm.get_file_contents('single_line.py')))
             assert expected == output, "single_line test failed."
-
-    def multi_line(self):
-        with open('multi_line_expected.txt') as file:
+        
+        with open('get_functions_multi_line.txt') as file:
             expected = file.read()
             output = str(xpm.get_functions(xpm.get_file_contents('multi_line.py')))
             assert expected == output, "multi_line test failed."
 
-    def mixed_line(self):
-        with open('mixed_line_expected.txt') as file:
+        with open('get_functions_mixed_line.txt') as file:
             expected = file.read()
             output = str(xpm.get_functions(xpm.get_file_contents('mixed_line.py')))
             assert expected == output, "mixed_line test failed."
 
-test_0 = FunctionExtractionTests()
-test_0.single_line()
-test_0.multi_line()
-test_0.mixed_line()
+    def extract_python_test(self):
+        with open('extract_python_single_line.txt') as file:
+            expected = file.read()
+            output = str(xpm.extract_python('single_line.py'))
+            assert expected == output
+
+        with open('extract_python_multi_line.txt') as file:
+            expected = file.read()
+            output = str(xpm.extract_python('multi_line.py'))
+            assert expected == output
+
+        with open('extract_python_mixed_line.txt') as file:
+            expected = file.read()
+            output = str(xpm.extract_python('mixed_line.py'))
+            assert expected == output
+
+test = xtract_python_main_tests()
+test.get_functions_test()
+test.extract_python_test()
