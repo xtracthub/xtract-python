@@ -19,7 +19,13 @@ class FunctionExtractionTests(unittest.TestCase):
             output = str(xpm.get_functions(xpm.get_file_contents('multi_line.py')))
             assert expected == output, "multi_line test failed."
 
+    def mixed_line(self):
+        with open('mixed_line_expected.txt') as file:
+            expected = file.read()
+            output = str(xpm.get_functions(xpm.get_file_contents('mixed_line.py')))
+            assert expected == output, "mixed_line test failed."
 
 test_0 = FunctionExtractionTests()
 test_0.single_line()
 test_0.multi_line()
+test_0.mixed_line()
