@@ -49,10 +49,16 @@ def get_functions(file_contents):
     functions = {}
 
     for function, parameters in re.findall("def (.*)\((.*)\)", file_contents):
-        functions[function] = {"params": re.split(",", parameters), "docstring": ""}
+        functions[function] = {"params": re.split(
+            ",", parameters), "docstring": ""}
 
     for function, parameters, docstring in re.findall("def (.*)\((.*)\):\n\s*\"{3}(.*)\"{3}", file_contents):
-        functions[function] = {"params": re.split(",", parameters), "docstring": docstring}
+        functions[function] = {"params": re.split(
+            ",", parameters), "docstring": docstring}
+
+    for function, parameters, docstring in re.findall('def (.*?)\((.*?)\):\s*\"{3}(.*?)\"{3}', file_contents, flags=re.DOTALL):
+        functions[function] = {"params": re.split(
+            ",", parameters), "docstring": re.sub('\s+', " ", docstring.strip())}
 
     return functions
 
