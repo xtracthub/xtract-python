@@ -79,3 +79,15 @@ def extract_python(python_path):
     metadata["functions"] = get_functions(file_contents)
 
     return metadata
+
+
+def python_len(python_path):
+    file_contents = get_file_contents(python_path)
+    length = 0
+
+    for i in file_contents:
+        if i == '\n': 
+            length += 1
+    
+    return length
+    

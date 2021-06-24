@@ -57,9 +57,19 @@ class xtract_python_main_tests(unittest.TestCase):
             expected = file.read()
             output = str(xpm.extract_python('tests/test_files/mixed_line.py'))
             assert expected == output
+    
+    def python_len_test(self):
+        assert xpm.python_len('tests/test_files/single_line.py') == 21
+
+        assert xpm.python_len('tests/test_files/multi_line.py') == 42
+
+        assert xpm.python_len('tests/test_files/mixed_line.py') == 68
+
 
 test = xtract_python_main_tests()
 test.get_imports_test()
-# test.get_functions_test()
-# test.extract_python_test()
+test.get_functions_test()
+test.extract_python_test()
 # test.get_cwd()
+test.python_len_test()
+
