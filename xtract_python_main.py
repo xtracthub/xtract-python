@@ -92,8 +92,13 @@ def python_len(python_path):
     return length
 
 def pep8_compliance(python_path):
+    """Returns whether a python file meets PEP8 standards.
+
+    Parameter:
+    python_path (str): Path of python file to determine PEP8 compliance.
+
+    Return:
+    pep8 compliance (boolean): True if PEP8 compliant, False otherwise.
+    """
     comp_proc = subprocess.run(["pycodestyle", python_path], capture_output=True, text=True)
     return len(comp_proc.stdout) == 0
-
-print(pep8_compliance('good.py'))
-print(pep8_compliance('xtract_python_main.py'))
