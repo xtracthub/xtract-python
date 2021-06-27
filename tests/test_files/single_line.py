@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib as mpl
 
+
 def foo_0(bar):
     """Checking for handling of spaces on a single line."""
     return bar
