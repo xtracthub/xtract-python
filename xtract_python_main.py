@@ -100,5 +100,16 @@ def pep8_compliance(python_path):
     Return:
     pep8 compliance (boolean): True if PEP8 compliant, False otherwise.
     """
-    comp_proc = subprocess.run(["pycodestyle", python_path], capture_output=True, text=True)
-    return len(comp_proc.stdout) == 0
+
+    issues = []
+
+    try:
+        process = subprocess.run(["pycodestyle", python_path], capture_output=True, text=True)
+        for _, line, char, descrip in re.findall("(.*):(.*):(.*): (.*)", process.stdout):
+            issue = {"line": line, "char": char, "description": descrip}
+            issues.append(issue)
+    except:
+        print('Error: unable to run pycodestyle as subprocess.')
+        return
+
+    return len(process.stdout) == 0, issues
