@@ -70,6 +70,7 @@ class xtract_python_main_tests(unittest.TestCase):
 
 
 
+
 test = xtract_python_main_tests()
 test.get_imports_test()
 test.get_functions_test()
@@ -79,7 +80,9 @@ test.pep8_compliance_test
 
 
 
-test.get_cwd()
+# Preliminary test for get_comments function
+b = xpm.get_comments(xpm.get_file_contents('test_files/num_open_calls_test.py'))
+print(b)
 
-a = xpm.num_open_calls('test_files/num_open_calls_test.py')
-print(a)
+c = xpm.get_comments(xpm.get_file_contents('test_files/num_open_calls_test2.py'))
+print(c)
