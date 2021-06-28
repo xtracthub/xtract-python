@@ -15,6 +15,22 @@ def get_file_contents(file_path):
 
     return file_contents
 
+def get_code(file_path):
+    """Retrieves only code from a file by excluding comments and docstrings.
+
+    Parameter:
+    file_path (str): Path of file to get only code from.
+
+    Return:
+    file_contents (str): Contents from file_path.
+    """
+    with open(file_path) as f:
+        file_contents = f.read()
+
+    
+    return file_contents
+
+
 
 def get_imports(file_contents):
     """Retrieves imported libraries and functions.
@@ -86,9 +102,11 @@ def extract_python(python_path):
 def python_len(python_path):
     file_contents = get_file_contents(python_path)
     length = 0
+
     for i in file_contents:
         if i == '\n':
             length += 1
+
     return length
 
 def pep8_compliance(python_path):
@@ -100,7 +118,6 @@ def pep8_compliance(python_path):
     Return:
     pep8 compliance (boolean): True if PEP8 compliant, False otherwise.
     """
-
     issues = []
 
     try:
@@ -113,3 +130,21 @@ def pep8_compliance(python_path):
         return
 
     return len(process.stdout) == 0, issues
+
+def num_open_calls(python_path):
+    file_contents = get_file_contents(python_path)
+
+    all_ref = 0
+    docstring_ref = 0
+    comment_ref = 0
+
+    for _ in re.findall('open(.*)', file_contents):
+        all_ref += 1
+    
+    for _ in re.findall('', file_contents):
+        docstring_ref += 1
+    
+    for _ in re.findall('', file_contents):
+        comment_ref += 1
+    
+    return (all_ref - docstring_ref - comment_ref)

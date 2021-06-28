@@ -65,6 +65,9 @@ class xtract_python_main_tests(unittest.TestCase):
             expected = file.read()
             output = xpm.pep8_compliance('test_files/pep8_noncompliant_test.py')
             assert expected == output
+    
+    # def num_open_calls_test(self):
+
 
 
 test = xtract_python_main_tests()
@@ -73,3 +76,10 @@ test.get_functions_test()
 test.extract_python_test()
 test.python_len_test()
 test.pep8_compliance_test
+
+
+
+test.get_cwd()
+
+a = xpm.num_open_calls('test_files/num_open_calls_test.py')
+print(a)
