@@ -1,5 +1,5 @@
 import re
-
+import subprocess
 
 def get_file_contents(file_path):
     """Retrieves contents from a file.
@@ -23,7 +23,8 @@ def get_imports(file_contents):
     file_contents (str): Contents of python file.
 
     Return:
-    imports (dict): Imported libraries and functions in the format {library: [imported_functions]}.
+    imports (dict): Imported libraries and functions in the format
+    {library: [imported_functions]}.
     """
     imports = {}
 
@@ -70,7 +71,8 @@ def extract_python(python_path):
     python_path (str): Path of python file to retrieve metadata from.
 
     Return:
-    metadata (dict): Imports and function info. from python file in the format {imports: {}, functions: {}}.
+    metadata (dict): Imports and function info. from python file in the format
+    {imports: {}, functions: {}}.
     """
     file_contents = get_file_contents(python_path)
     metadata = {}
@@ -79,3 +81,35 @@ def extract_python(python_path):
     metadata["functions"] = get_functions(file_contents)
 
     return metadata
+
+
+def python_len(python_path):
+    file_contents = get_file_contents(python_path)
+    length = 0
+    for i in file_contents:
+        if i == '\n':
+            length += 1
+    return length
+
+def pep8_compliance(python_path):
+    """Returns whether a python file meets PEP8 standards.
+
+    Parameter:
+    python_path (str): Path of python file to determine PEP8 compliance.
+
+    Return:
+    pep8 compliance (boolean): True if PEP8 compliant, False otherwise.
+    """
+
+    issues = []
+
+    try:
+        process = subprocess.run(["pycodestyle", python_path], capture_output=True, text=True)
+        for _, line, char, descrip in re.findall("(.*):(.*):(.*): (.*)", process.stdout):
+            issue = {"line": line, "char": char, "description": descrip}
+            issues.append(issue)
+    except:
+        print('Error: unable to run pycodestyle as subprocess.')
+        return
+
+    return len(process.stdout) == 0, issues
