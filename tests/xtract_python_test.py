@@ -61,12 +61,13 @@ class xtract_python_main_tests(unittest.TestCase):
         assert xpm.pep8_compliance('test_files/single_line.py') == (True, [])
         assert xpm.pep8_compliance('test_files/multi_line.py') == (True, [])
         assert xpm.pep8_compliance('test_files/mixed_line.py') == (True, [])
-        with open('expected/pep8_compliance_noncompliant.txt') as file:
+        with open('expected/pep8_compliance_test1.txt') as file:            
             expected = file.read()
-            output = xpm.pep8_compliance('test_files/pep8_noncompliant_test.py')
+            output = str(xpm.pep8_compliance('test_files/pep8_compliance_test1.py'))
             assert expected == output
     
-    # def num_open_calls_test(self):
+    def num_calls_open_test(self):
+        assert xpm.num_calls_open('test_files/num_calls_open_test1.py') == 13
 
 
 
@@ -76,18 +77,5 @@ test.get_imports_test()
 test.get_functions_test()
 test.extract_python_test()
 test.python_len_test()
-test.pep8_compliance_test
-
-
-
-# Preliminary test for get_comments function
-# b = xpm.get_comments(xpm.get_file_contents('test_files/num_open_calls_test.py'))
-# print(b)
-# c = xpm.get_comments(xpm.get_file_contents('test_files/num_open_calls_test2.py'))
-# print(c)
-
-# d = xpm.num_open_calls('test_files/num_open_calls_test.py')
-# print(d)
-
-e = xpm.num_calls_arbitrary('test_files/num_open_calls_test.py', 'print')
-print(e)
+test.pep8_compliance_test()
+test.num_calls_open_test()

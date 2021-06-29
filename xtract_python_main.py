@@ -181,6 +181,4 @@ def num_calls_open(python_path):
     Return:
     num_calls (int): number of calls made to a specific function.
     """
-    return self.num_calls_arbitrary(python_path=python_path, function='open')
-    
-
+    return num_calls_arbitrary(python_path=python_path, function='open')

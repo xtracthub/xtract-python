@@ -3,8 +3,39 @@ import matplotlib as mpl
 
 
 def foo_0(bar):
-    """ open('') call """
+    """ variety of open() calls """
+    open()
+
     open('')
+
+    open('dummyfile.jpg')
+    
+    open('dummyfile.jpg', 'wr')
+
+    open("")
+
+    open("dummyfile.jpg")
+    
+    open("dummyfile.jpg", "wr")
+
+    with open('') as f:
+        bar += 1
+
+    with open('dummyfile.jpg') as f:
+        bar += 1
+    
+    with open('dummyfile.jpg', 'wr') as f:
+        bar += 1
+
+    with open("") as f:
+        bar += 1
+
+    with open("dummyfile.jpg") as f:
+        bar += 1
+    
+    with open("dummyfile.jpg", "wr") as f:
+        bar += 1
+
     return bar
 
 
