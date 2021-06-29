@@ -109,6 +109,14 @@ def extract_python(python_path):
 
 
 def python_len(python_path):
+    """Returns the number of lines in a python file.
+
+    Parameter:
+    python_path (str): Path of python file to determine number of lines.
+
+    Return:
+    length (int): number of lines in a python file.
+    """
     file_contents = get_file_contents(python_path)
     length = 0
 
@@ -140,18 +148,38 @@ def pep8_compliance(python_path):
 
     return len(process.stdout) == 0, issues
 
-# def remove_comments(file_path):
-#     # ([\'"])\1\1.*?open[(](.*?)[)].*?\1{3}
-#     # ([\'"])\1\1.*?open\((.*?)\).*?\1{3}
+def num_calls_arbitrary(python_path, function):
+    """Returns the number of calls to arbitrary function made by a python
+    file.
 
-def num_open_calls(python_path):
+    Parameter(s):
+    python_path (str): Path of python file to count number of calls to an
+    arbitrary function.
+    function (str): Name of the function to count number of calls to.
+
+    Return:
+    num_calls (int): number of calls made to a specific function.
+    """
     file_contents = get_file_contents(python_path)
-
-    pattern = r'(["\'])\1\1.*?open\(.*?\).*?\1{3}|#.*?open\(.*?\).*?'
+    pattern = r'(["\'])\1\1.*?' + function + r'\(.*?\).*?\1{3}|#.*?' + function + r'\(.*?\).*?'
     stripped_file_contents = re.sub(pattern, '', file_contents, flags=re.DOTALL)
 
     num_calls = 0
-    for _ in re.findall(r'open\(.*?\)', stripped_file_contents):
+    for _ in re.findall(function + r'\(.*?\)', stripped_file_contents):
         num_calls += 1
     
     return num_calls
+
+def num_calls_open(python_path):
+    """Returns the number of calls to the open function made by a python
+    file.
+
+    Parameter(s):
+    python_path (str): Path of python file to count number of calls to the
+    open function/system call.
+
+    Return:
+    num_calls (int): number of calls made to a specific function.
+    """
+    return self.num_calls_arbitrary(python_path=python_path, function='open')
+

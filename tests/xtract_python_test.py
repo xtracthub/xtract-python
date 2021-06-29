@@ -86,5 +86,8 @@ test.pep8_compliance_test
 # c = xpm.get_comments(xpm.get_file_contents('test_files/num_open_calls_test2.py'))
 # print(c)
 
-d = xpm.num_open_calls('test_files/num_open_calls_test.py')
-print(d)
+# d = xpm.num_open_calls('test_files/num_open_calls_test.py')
+# print(d)
+
+e = xpm.num_calls_arbitrary('test_files/num_open_calls_test.py', 'print')
+print(e)
