@@ -140,25 +140,18 @@ def pep8_compliance(python_path):
 
     return len(process.stdout) == 0, issues
 
-def remove_comments(file_path):
-    # ([\'"])\1\1.*?open[(](.*?)[)].*?\1{3}
-    # ([\'"])\1\1.*?open\((.*?)\).*?\1{3}
+# def remove_comments(file_path):
+#     # ([\'"])\1\1.*?open[(](.*?)[)].*?\1{3}
+#     # ([\'"])\1\1.*?open\((.*?)\).*?\1{3}
 
 def num_open_calls(python_path):
     file_contents = get_file_contents(python_path)
 
-    all_ref = 0
-    docstring_ref = 0
-    comment_ref = 0
+    pattern = r'(["\'])\1\1.*?open\(.*?\).*?\1{3}|#.*?open\(.*?\).*?'
+    stripped_file_contents = re.sub(pattern, '', file_contents, flags=re.DOTALL)
 
-    for _ in re.findall('open(.*)', file_contents):
-        all_ref += 1
+    num_calls = 0
+    for _ in re.findall(r'open\(.*?\)', stripped_file_contents):
+        num_calls += 1
     
-    for _ in re.findall('', file_contents):
-        docstring_ref += 1
-    
-    for _ in re.findall('', file_contents):
-        comment_ref += 1
-    
-    return (all_ref - docstring_ref - comment_ref)
-
+    return num_calls
