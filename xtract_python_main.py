@@ -28,8 +28,12 @@ def get_comments(file_contents):
     """
     comments = []
 
-    for quote, comment in re.findall(r'([\'"])\1\1(.*?)\1{3}', file_contents):
+    for quote, comment in re.findall(r'([\'"])\1\1(.*?)\1{3}', file_contents, re.DOTALL):
         comments.append(comment.strip())
+    
+    # Alternate match - finally figured it out!
+    # for match_1, match_2 in re.findall(r'\'{2}(.*?)\'{3}|"{2}(.*?)"{3}', file_contents):
+    #     print(match_1, match_2)
     
     for comment in re.findall(r'#(.*)', file_contents):
         comments.append(comment.strip())
@@ -136,6 +140,10 @@ def pep8_compliance(python_path):
 
     return len(process.stdout) == 0, issues
 
+def remove_comments(file_path):
+    # ([\'"])\1\1.*?open[(](.*?)[)].*?\1{3}
+    # ([\'"])\1\1.*?open\((.*?)\).*?\1{3}
+
 def num_open_calls(python_path):
     file_contents = get_file_contents(python_path)
 
@@ -153,3 +161,4 @@ def num_open_calls(python_path):
         comment_ref += 1
     
     return (all_ref - docstring_ref - comment_ref)
+
