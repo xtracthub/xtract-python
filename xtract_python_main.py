@@ -15,21 +15,26 @@ def get_file_contents(file_path):
 
     return file_contents
 
-def get_code(file_path):
-    """Retrieves only code from a file by excluding comments and docstrings.
+def get_comments(file_contents):
+    """Retrieves comments in a python file. Note that technically multi-line
+    strings are not 'comments' per PEP8, but they will be considered as such
+    for the purposes of this extractor.
 
     Parameter:
-    file_path (str): Path of file to get only code from.
+    file_contents (str): Contents of python file.
 
     Return:
-    file_contents (str): Contents from file_path.
+    comments (arr): an array of comments
     """
-    with open(file_path) as f:
-        file_contents = f.read()
+    comments = []
 
+    for quote, comment in re.findall(r'([\'"])\1\1(.*?)\1{3}', file_contents):
+        comments.append(comment.strip())
     
-    return file_contents
+    for comment in re.findall(r'#(.*)', file_contents):
+        comments.append(comment.strip())
 
+    return comments
 
 
 def get_imports(file_contents):

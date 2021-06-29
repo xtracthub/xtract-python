@@ -84,5 +84,5 @@ test.pep8_compliance_test
 b = xpm.get_comments(xpm.get_file_contents('test_files/num_open_calls_test.py'))
 print(b)
 
-c = xpm.get_comments(xpm.get_file_contents('test_files/num_open_calls_test2.py'))
-print(c)
+# c = xpm.get_comments(xpm.get_file_contents('test_files/num_open_calls_test2.py'))
+# print(c)
