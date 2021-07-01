@@ -1,5 +1,6 @@
 import re
 import subprocess
+import sys
 
 def get_file_contents(file_path):
     """Retrieves contents from a file.
@@ -30,10 +31,6 @@ def get_comments(file_contents):
 
     for quote, comment in re.findall(r'([\'"])\1\1(.*?)\1{3}', file_contents, re.DOTALL):
         comments.append(comment.strip())
-    
-    # Alternate match - finally figured it out!
-    # for match_1, match_2 in re.findall(r'\'{2}(.*?)\'{3}|"{2}(.*?)"{3}', file_contents):
-    #     print(match_1, match_2)
     
     for comment in re.findall(r'#(.*)', file_contents):
         comments.append(comment.strip())
@@ -182,3 +179,5 @@ def num_calls_open(python_path):
     num_calls (int): number of calls made to a specific function.
     """
     return num_calls_arbitrary(python_path=python_path, function='open')
+
+def get_version(python_path):
