@@ -136,7 +136,7 @@ def pep8_compliance(python_path):
     issues = []
 
     try:
-        process = subprocess.run(["pycodestyle", python_path], capture_output=True, text=True)
+        process = subprocess.run(['pycodestyle', python_path], capture_output=True, text=True)
         for _, line, char, descrip in re.findall("(.*):(.*):(.*): (.*)", process.stdout):
             issue = {"line": line, "char": char, "description": descrip}
             issues.append(issue)
@@ -182,32 +182,31 @@ def num_calls_open(python_path):
     return num_calls_arbitrary(python_path=python_path, function='open')
 
 def get_compilation_version(python_path):
-    # Inject a quick python script
+    # inject a quick python script
     inject = 'import platform\nprint(platform.python_version())\n\n'
-    uninjected = get_file_contents(python_path)
+    old_script = get_file_contents(python_path)
+    new_script = inject + old_script
 
-    injected_script = inject + uninjected
+    new_path = os.path.splitext(python_path)[0] + '_inj.py'
 
-    injected_python_path = os.path.splitext(python_path)[0] + '_inj.py'
-    # print(injected_python_path)
+    with open(new_path, 'w') as f:
+        f.write(new_script)
 
-    with open(injected_python_path, 'w') as f:
-        f.write(injected_script)
+    # quick sanity check
+    x = get_file_contents(new_path)
+    assert x == new_script
 
-    x = get_file_contents(injected_python_path)
-    assert x == injected_script
+    process = subprocess.run(['python', new_path], capture_output=True, text=True)
+    os.remove(new_path)
 
-    process = subprocess.run(["python", injected_python_path], capture_output=True, text=True)
     output = process.stdout
     version = re.search('(.*?)$', output)
-    # print(type(version))
+
     print(version[0])
     return version[0]
 
 
 def get_compatible_version(python_path):
-    subprocess.run('')
-
-
-    # Run two subprocesses
-    pass
+    py2_proc = subprocess.run(['python2', python_path], capture_output=True, text=True)
+    py3_proc = subprocess.run(['python3', python_path], capture_output=True, text=True)
+    return None
