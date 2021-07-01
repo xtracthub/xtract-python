@@ -1,3 +1,4 @@
+
 # xtract-python
 
 ## Functionality (WIP)
@@ -17,3 +18,7 @@ Currently supported functionality as of 07/01/2021. Documentation is provided as
 |num_calls_open|Returns the number of calls made to the open() syscall.
 |get_compilation_version|Returns the version that a python script is interpreted with at runtime.
 |get_compatible_version|Returns a tuple of versions of python interpreters that are compatible with a given python script.
+
+## To-Do
+ - [ ] Add types for parameters and return variables in methods that return function parameters.
+ - [ ] Add return parameter to function extraction.
