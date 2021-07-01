@@ -20,5 +20,7 @@ Currently supported functionality as of 07/01/2021. Documentation is provided as
 |get_compatible_version|Returns a tuple of versions of python interpreters that are compatible with a given python script.
 
 ## To-Do
- - [ ] Add types for parameters and return variables in methods that return function parameters.
- - [ ] Add return parameter to function extraction.
+ - [ ] Add types for input parameters and return variables to function extraction.
+ - [ ] Add return to function extraction. We include the input parameters, so why not the return parameter?
+ - [ ] Find a way to test get_compilation_version and get_compatible_version. Perhaps this could be achieved by finding features that were implemented in each major version of 2.X and 3.X and ensuring that the the interpreter version is as expected.
+ - [ ] Perhaps some structure that gives a quick summary of the metadata extracted? This could take the form of a dictionary.
