@@ -79,3 +79,8 @@ test.extract_python_test()
 test.python_len_test()
 test.pep8_compliance_test()
 test.num_calls_open_test()
+
+
+
+
+xpm.get_compilation_version('test_files/single_line.py')

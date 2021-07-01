@@ -1,6 +1,7 @@
 import re
 import subprocess
 import sys
+import os
 
 def get_file_contents(file_path):
     """Retrieves contents from a file.
@@ -180,4 +181,33 @@ def num_calls_open(python_path):
     """
     return num_calls_arbitrary(python_path=python_path, function='open')
 
-def get_version(python_path):
+def get_compilation_version(python_path):
+    # Inject a quick python script
+    inject = 'import platform\nprint(platform.python_version())\n\n'
+    uninjected = get_file_contents(python_path)
+
+    injected_script = inject + uninjected
+
+    injected_python_path = os.path.splitext(python_path)[0] + '_inj.py'
+    # print(injected_python_path)
+
+    with open(injected_python_path, 'w') as f:
+        f.write(injected_script)
+
+    x = get_file_contents(injected_python_path)
+    assert x == injected_script
+
+    process = subprocess.run(["python", injected_python_path], capture_output=True, text=True)
+    output = process.stdout
+    version = re.search('(.*?)$', output)
+    # print(type(version))
+    print(version[0])
+    return version[0]
+
+
+def get_compatible_version(python_path):
+    subprocess.run('')
+
+
+    # Run two subprocesses
+    pass
