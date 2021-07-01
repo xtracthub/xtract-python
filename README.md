@@ -1,8 +1,8 @@
-# xtract-python
+xtract-python
 
 ## Functionality (WIP)
 
-Currently supported functionality as of 07/01/2021. Documentation is provided as WIP.
+Currently supported functionality as of 07/01/2021.
 
 |Method              |Description 
 |:-------------------|:------------------------------|
