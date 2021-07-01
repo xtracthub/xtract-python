@@ -182,7 +182,15 @@ def num_calls_open(python_path):
     return num_calls_arbitrary(python_path=python_path, function='open')
 
 def get_compilation_version(python_path):
-    # inject a quick python script
+    """Returns the version of the python interpreter used when executing
+    a python script.
+
+    Parameter(s):
+    python_path (str): Path of python file to get version of intepreter used.
+
+    Return:
+    version[0] (str): Version of python interpreter as a string.
+    """
     inject = 'import platform\nprint(platform.python_version())\n\n'
     old_script = get_file_contents(python_path)
     new_script = inject + old_script
@@ -192,21 +200,27 @@ def get_compilation_version(python_path):
     with open(new_path, 'w') as f:
         f.write(new_script)
 
-    # quick sanity check
-    x = get_file_contents(new_path)
-    assert x == new_script
-
     process = subprocess.run(['python', new_path], capture_output=True, text=True)
     os.remove(new_path)
 
     output = process.stdout
     version = re.search('(.*?)$', output)
 
-    print(version[0])
     return version[0]
 
 
 def get_compatible_version(python_path):
+    """Returns compatible versions of python with a given python script.
+
+    Parameter(s):
+    python_path (str): Path of python file to determine compatible interpreter
+    versions.
+
+    Return:
+    (bool, bool): A tuple returning the compability of the python script with
+    the python2 interpreter and the python3 interpreter, respectively.
+    """
     py2_proc = subprocess.run(['python2', python_path], capture_output=True, text=True)
     py3_proc = subprocess.run(['python3', python_path], capture_output=True, text=True)
-    return None
+    
+    return len(py2_proc.stderr) == 0, len(py3_proc.stderr) == 0
