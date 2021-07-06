@@ -1,11 +1,10 @@
-import sys
-import os
-import unittest
-
-from pathlib import Path
 path = str(Path(Path(__file__).parent.absolute()).parent.absolute())
 sys.path.append(path) 
 
+import sys
+import os
+import unittest
+from pathlib import Path
 import xtract_python_main as xpm
 
 
@@ -64,8 +63,6 @@ class xtract_python_main_tests(unittest.TestCase):
 
     def pep8_compliance_test(self):
         assert xpm.pep8_compliance('tests/test_files/single_line.py') == 0, []
-
-
 
 
 test = xtract_python_main_tests()
