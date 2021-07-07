@@ -223,4 +223,91 @@ def get_compatible_version(python_path):
     py2_proc = subprocess.run(['python2', python_path], capture_output=True, text=True)
     py3_proc = subprocess.run(['python3', python_path], capture_output=True, text=True)
     
-    return len(py2_proc.stderr) == 0, len(py3_proc.stderr) == 0
+    return 'python2='+str(len(py2_proc.stderr) == 0), 'python3='+str(len(py3_proc.stderr) == 0)
+
+def get_compatible_versions(python_path):
+    """ Returns minimum compatible python version for a given python_path file.
+    This is done by checking for features added through versions 3.0.X to
+    3.9.X.
+    
+    Probably should check first for new modules that were added, as this should
+    be a foolproof way.
+
+
+
+    Parameter(s):
+    python_path (str): Path of python file to determine compatible interpreter
+    versions.
+
+    Return:
+    str: a minimum python version that works.
+    """
+    new_syntax = {
+        'format(.*,.*)':'3.1',    # added comma as an option for the format minilanguage
+        # added support for un-numbered .format {}, do this repeatedly using re.findall
+        '.*?{(.*?)}.*\'\.format\(.*\)': '3.1'       
+        'with (.*), (.*)': '3.1' # added support for multi-context with opening
+        'yield from': '3.2'
+
+        '@': '3.5'
+
+    }
+
+    new_functions = {
+        'breakpoint()': '3.7',
+    }
+
+    new_structures = {
+        'PyConfig': '3.8',
+        'PyPreConfig': '3.8',
+        'PyStatus': '3.8',
+        'PyWideStringList': '3.8'
+    }
+
+    new_methods = {
+        {'type': 'int()', 'method': 'bit_length()'}: '3.1',
+        {'type': 'bytes()', 'method': 'maketrans()'}: '3.1',
+        {'type': 'bytesarray()', 'method': 'maketrans()'}: '3.1',
+        {'type': 'logging.config', 'method': 'dictConfig()'}: '3.1',
+
+        {'type': 'bytes()', 'method': 'hex()'}: '3.5',
+        {'type': 'bytearray()', 'method': 'hex()'}: '3.5',
+        {'type': 'memoryview()', 'method': 'hex()'}: '3.5',
+        {'type': 'subprocess()', 'method':'run()'}: '3.5',
+        
+    }
+
+    new_modules = {
+        'collections.Counter': '3.1',
+        'argparse': '3.1',
+
+        'faulthandler': '3.3',
+        'ipaddress': '3.3',
+        'lzma': '3.3',
+        'unittest.mock': '3.3',
+        'venv': '3.3',
+
+        'asyncio': '3.4',
+        'ensurepip': '3.4',
+        'enum': '3.4',
+        'pathlib': '3.4',
+        'selectors': '3.4',
+        'statistics': '3.4',
+        'tracemalloc': '3.4',
+
+        'typing': '3.5',
+        'zipapp': '3.5',
+
+        'secrets': '3.6',
+
+        'contextvars': '3.7',
+        'dataclasses': '3.7',
+
+    }
+
+    new_errors = {
+        'RecursionError': '3.5',
+
+    }
+
+    return

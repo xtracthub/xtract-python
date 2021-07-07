@@ -80,7 +80,5 @@ test.python_len_test()
 test.pep8_compliance_test()
 test.num_calls_open_test()
 
-# Seems to work
-# xpm.get_compilation_version('test_files/single_line.py')
-
+print(xpm.get_compilation_version('test_files/single_line.py'))
 print(xpm.get_compatible_version('test_files/single_line.py'))
