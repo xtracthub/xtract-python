@@ -3,6 +3,7 @@ import subprocess
 import sys
 import os
 
+
 def get_file_contents(file_path):
     """Retrieves contents from a file.
 
@@ -16,6 +17,7 @@ def get_file_contents(file_path):
         file_contents = f.read()
 
     return file_contents
+
 
 def get_comments(file_contents):
     """Retrieves comments in a python file. Note that technically multi-line
@@ -32,7 +34,7 @@ def get_comments(file_contents):
 
     for quote, comment in re.findall(r'([\'"])\1\1(.*?)\1{3}', file_contents, re.DOTALL):
         comments.append(comment.strip())
-    
+
     for comment in re.findall(r'#(.*)', file_contents):
         comments.append(comment.strip())
 
@@ -124,6 +126,7 @@ def python_len(python_path):
 
     return length
 
+
 def pep8_compliance(python_path):
     """Returns whether a python file meets PEP8 standards.
 
@@ -136,7 +139,8 @@ def pep8_compliance(python_path):
     issues = []
 
     try:
-        process = subprocess.run(['pycodestyle', python_path], capture_output=True, text=True)
+        process = subprocess.run(
+            ['pycodestyle', python_path], capture_output=True, text=True)
         for _, line, char, descrip in re.findall("(.*):(.*):(.*): (.*)", process.stdout):
             issue = {"line": line, "char": char, "description": descrip}
             issues.append(issue)
@@ -145,6 +149,7 @@ def pep8_compliance(python_path):
         return
 
     return len(process.stdout) == 0, issues
+
 
 def num_calls_arbitrary(python_path, function):
     """Returns the number of calls to arbitrary function made by a python
@@ -159,14 +164,17 @@ def num_calls_arbitrary(python_path, function):
     num_calls (int): number of calls made to a specific function.
     """
     file_contents = get_file_contents(python_path)
-    pattern = r'(["\'])\1\1.*?' + function + r'\(.*?\).*?\1{3}|#.*?' + function + r'\(.*?\).*?'
-    stripped_file_contents = re.sub(pattern, '', file_contents, flags=re.DOTALL)
+    pattern = r'(["\'])\1\1.*?' + function + \
+        r'\(.*?\).*?\1{3}|#.*?' + function + r'\(.*?\).*?'
+    stripped_file_contents = re.sub(
+        pattern, '', file_contents, flags=re.DOTALL)
 
     num_calls = 0
     for _ in re.findall(function + r'\(.*?\)', stripped_file_contents):
         num_calls += 1
-    
+
     return num_calls
+
 
 def num_calls_open(python_path):
     """Returns the number of calls to the open function made by a python
@@ -181,133 +189,94 @@ def num_calls_open(python_path):
     """
     return num_calls_arbitrary(python_path=python_path, function='open')
 
-def get_compilation_version(python_path):
-    """Returns the version of the python interpreter used when executing
-    a python script.
+# def get_compilation_version(python_path):
+#     """Returns the version of the python interpreter used when executing
+#     a python script.
 
-    Parameter(s):
-    python_path (str): Path of python file to get version of intepreter used.
+#     Parameter(s):
+#     python_path (str): Path of python file to get version of intepreter used.
 
-    Return:
-    version[0] (str): Version of python interpreter as a string.
-    """
-    inject = 'import platform\nprint(platform.python_version())\n\n'
-    old_script = get_file_contents(python_path)
-    new_script = inject + old_script
+#     Return:
+#     version[0] (str): Version of python interpreter as a string.
+#     """
+#     inject = 'import platform\nprint(platform.python_version())\n\n'
+#     old_script = get_file_contents(python_path)
+#     new_script = inject + old_script
 
-    new_path = os.path.splitext(python_path)[0] + '_inj.py'
+#     new_path = os.path.splitext(python_path)[0] + '_inj.py'
 
-    with open(new_path, 'w') as f:
-        f.write(new_script)
+#     with open(new_path, 'w') as f:
+#         f.write(new_script)
 
-    process = subprocess.run(['python', new_path], capture_output=True, text=True)
-    os.remove(new_path)
+#     process = subprocess.run(['python', new_path], capture_output=True, text=True)
+#     os.remove(new_path)
 
-    output = process.stdout
-    version = re.search('(.*?)$', output)
+#     output = process.stdout
+#     version = re.search('(.*?)$', output)
 
-    return version[0]
-
-
-def get_compatible_version(python_path):
-    """Returns compatible versions of python with a given python script.
-
-    Parameter(s):
-    python_path (str): Path of python file to determine compatible interpreter
-    versions.
-
-    Return:
-    (bool, bool): A tuple returning the compability of the python script with
-    the python2 interpreter and the python3 interpreter, respectively.
-    """
-    py2_proc = subprocess.run(['python2', python_path], capture_output=True, text=True)
-    py3_proc = subprocess.run(['python3', python_path], capture_output=True, text=True)
-    
-    return 'python2='+str(len(py2_proc.stderr) == 0), 'python3='+str(len(py3_proc.stderr) == 0)
-
-def get_compatible_versions(python_path):
-    """ Returns minimum compatible python version for a given python_path file.
-    This is done by checking for features added through versions 3.0.X to
-    3.9.X.
-    
-    Probably should check first for new modules that were added, as this should
-    be a foolproof way.
+#     return version[0]
 
 
+# def get_compatible_version(python_path):
+#     """Returns compatible versions of python with a given python script.
 
-    Parameter(s):
-    python_path (str): Path of python file to determine compatible interpreter
-    versions.
+#     Parameter(s):
+#     python_path (str): Path of python file to determine compatible interpreter
+#     versions.
 
-    Return:
-    str: a minimum python version that works.
-    """
-    new_syntax = {
-        'format(.*,.*)':'3.1',    # added comma as an option for the format minilanguage
-        # added support for un-numbered .format {}, do this repeatedly using re.findall
-        '.*?{(.*?)}.*\'\.format\(.*\)': '3.1'       
-        'with (.*), (.*)': '3.1' # added support for multi-context with opening
-        'yield from': '3.2'
+#     Return:
+#     (bool, bool): A tuple returning the compability of the python script with
+#     the python2 interpreter and the python3 interpreter, respectively.
+#     """
+#     py2_proc = subprocess.run(['python2', python_path], capture_output=True, text=True)
+#     py3_proc = subprocess.run(['python3', python_path], capture_output=True, text=True)
 
-        '@': '3.5'
+#     return 'python2='+str(len(py2_proc.stderr) == 0), 'python3='+str(len(py3_proc.stderr) == 0)
 
-    }
+# def get_compatible_versions(python_path):
+#     """ Returns minimum compatible python version for a given python_path file.
+#     This is done by checking for features added through versions 3.0.X to
+#     3.9.X.
 
-    new_functions = {
-        'breakpoint()': '3.7',
-    }
+#     Probably should check first for new modules that were added, as this should
+#     be a foolproof way.
 
-    new_structures = {
-        'PyConfig': '3.8',
-        'PyPreConfig': '3.8',
-        'PyStatus': '3.8',
-        'PyWideStringList': '3.8'
-    }
+#     Parameter(s):
+#     python_path (str): Path of python file to determine compatible interpreter
+#     versions.
 
-    new_methods = {
-        {'type': 'int()', 'method': 'bit_length()'}: '3.1',
-        {'type': 'bytes()', 'method': 'maketrans()'}: '3.1',
-        {'type': 'bytesarray()', 'method': 'maketrans()'}: '3.1',
-        {'type': 'logging.config', 'method': 'dictConfig()'}: '3.1',
+#     Return:
+#     str: a minimum python version that works.
+#     """
 
-        {'type': 'bytes()', 'method': 'hex()'}: '3.5',
-        {'type': 'bytearray()', 'method': 'hex()'}: '3.5',
-        {'type': 'memoryview()', 'method': 'hex()'}: '3.5',
-        {'type': 'subprocess()', 'method':'run()'}: '3.5',
+#     return
+
+def get_min_compatible_version(python_path):
+    per_file_basis = {}
+    per_path_basis = {}
+
+
+    try:
+        process = subprocess.run(
+            ['vermin', '--format parsable', '-vvvv', python_path], capture_output=True, text=True)
+        # print(process.stdout)
+
+        # pattern = '^([0-9.~?!]*),(.*) (.*)$'
+
+        pattern2 = '^([0-9.~?!]*),(.*) (.*)$^  (L.*): (.*) requires (.*), (.*)$'
         
-    }
+        for py2, py3, path in re.findall('^([0-9.~?!]*),(.*) (.*)$', process.stdout, flags=re.M):
+            per_file_basis.append({
+                'py2': py2,
+                'py3': py3,
+                'path': path,
+            })
 
-    new_modules = {
-        'collections.Counter': '3.1',
-        'argparse': '3.1',
 
-        'faulthandler': '3.3',
-        'ipaddress': '3.3',
-        'lzma': '3.3',
-        'unittest.mock': '3.3',
-        'venv': '3.3',
+            # print(py2, py3.strip(), path.strip())
 
-        'asyncio': '3.4',
-        'ensurepip': '3.4',
-        'enum': '3.4',
-        'pathlib': '3.4',
-        'selectors': '3.4',
-        'statistics': '3.4',
-        'tracemalloc': '3.4',
 
-        'typing': '3.5',
-        'zipapp': '3.5',
-
-        'secrets': '3.6',
-
-        'contextvars': '3.7',
-        'dataclasses': '3.7',
-
-    }
-
-    new_errors = {
-        'RecursionError': '3.5',
-
-    }
-
-    return
+        
+    except:
+        print('Error: unable to run Vermin as subprocess.')
+        return
