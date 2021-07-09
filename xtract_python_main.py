@@ -189,6 +189,7 @@ def num_calls_open(python_path):
     """
     return num_calls_arbitrary(python_path=python_path, function='open')
 
+# Not really a good function, should get deleted.
 # def get_compilation_version(python_path):
 #     """Returns the version of the python interpreter used when executing
 #     a python script.
@@ -217,6 +218,7 @@ def num_calls_open(python_path):
 #     return version[0]
 
 
+# Terrible function, should get deleted ASAP
 # def get_compatible_version(python_path):
 #     """Returns compatible versions of python with a given python script.
 
@@ -233,50 +235,57 @@ def num_calls_open(python_path):
 
 #     return 'python2='+str(len(py2_proc.stderr) == 0), 'python3='+str(len(py3_proc.stderr) == 0)
 
-# def get_compatible_versions(python_path):
-#     """ Returns minimum compatible python version for a given python_path file.
-#     This is done by checking for features added through versions 3.0.X to
-#     3.9.X.
 
-#     Probably should check first for new modules that were added, as this should
-#     be a foolproof way.
-
-#     Parameter(s):
-#     python_path (str): Path of python file to determine compatible interpreter
-#     versions.
-
-#     Return:
-#     str: a minimum python version that works.
-#     """
-
-#     return
 
 def get_min_compatible_version(python_path):
-    per_file_basis = {}
-    per_path_basis = {}
+    """ Returns minimum compatible python version for a given python_path file.
+    This is done by checking for features added through versions 3.0.X to
+    3.9.X.
 
+    Probably should check first for new modules that were added, as this should
+    be a foolproof way.
+
+    Parameter(s):
+    python_path (str): Path of python file to determine compatible interpreter
+    versions.
+
+    Return:
+    str: a minimum python version that works.
+    """
+    version_dict = []
+
+    if os.path.isdir(python_path):
+        file_paths = [os.path.join(python_path, f) for f in
+        os.listdir(python_path) if os.path.isfile(os.path.join(python_path, f))]
+    else:
+        file_paths = [python_path]
 
     try:
-        process = subprocess.run(
-            ['vermin', '--format parsable', '-vvvv', python_path], capture_output=True, text=True)
-        # print(process.stdout)
-
-        # pattern = '^([0-9.~?!]*),(.*) (.*)$'
-
-        pattern2 = '^([0-9.~?!]*),(.*) (.*)$^  (L.*): (.*) requires (.*), (.*)$'
+        for file_path in file_paths:
+            process = subprocess.run(['vermin', '--format parsable', '-vvvv', file_path], capture_output=True, text=True)
         
-        for py2, py3, path in re.findall('^([0-9.~?!]*),(.*) (.*)$', process.stdout, flags=re.M):
-            per_file_basis.append({
-                'py2': py2,
-                'py3': py3,
-                'path': path,
-            })
+            tmp_dict = {}
+            details = []
 
-
-            # print(py2, py3.strip(), path.strip())
-
-
+            for py2, py3, path in re.findall(f'^([~!?0-9.]*), ([~!?0-9.]*)\s*(.*)$', process.stdout, flags=re.M):
+                tmp_dict = {
+                    'path': path,
+                    'py2': py2,
+                    'py3': py3
+                }
         
+            for loc, key, py2, py3 in re.findall(f'^  (L.*): (.*) requires (.*), (.*)$', process.stdout, flags=re.M):
+                issue = {
+                    'location': loc,
+                    'keyword': key,
+                    'min_py2': py2,
+                    'min_py3': py3
+                }
+                details.append(issue)
+                
+            tmp_dict['details'] = details
+            version_dict.append(tmp_dict)
+        return version_dict
     except:
         print('Error: unable to run Vermin as subprocess.')
         return
