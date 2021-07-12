@@ -1,0 +1,5 @@
+.DS_Store
+__pycache__
+exp/
+tests/test_files/binance-trade-bot/*
+
