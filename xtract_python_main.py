@@ -2,6 +2,7 @@ import re
 import subprocess
 import sys
 import os
+import pathlib
 
 
 def get_file_contents(file_path):
@@ -127,30 +128,6 @@ def python_len(python_path):
     return length
 
 
-def pep8_compliance(python_path):
-    """Returns whether a python file meets PEP8 standards.
-
-    Parameter:
-    python_path (str): Path of python file to determine PEP8 compliance.
-
-    Return:
-    pep8 compliance (boolean): True if PEP8 compliant, False otherwise.
-    """
-    issues = []
-
-    try:
-        process = subprocess.run(
-            ['pycodestyle', python_path], capture_output=True, text=True)
-        for _, line, char, descrip in re.findall("(.*):(.*):(.*): (.*)", process.stdout):
-            issue = {"line": line, "char": char, "description": descrip}
-            issues.append(issue)
-    except:
-        print('Error: unable to run pycodestyle as subprocess.')
-        return
-
-    return len(process.stdout) == 0, issues
-
-
 def num_calls_arbitrary(python_path, function):
     """Returns the number of calls to arbitrary function made by a python
     file.
@@ -189,65 +166,42 @@ def num_calls_open(python_path):
     """
     return num_calls_arbitrary(python_path=python_path, function='open')
 
-# Not really a good function, should get deleted.
-# def get_compilation_version(python_path):
-#     """Returns the version of the python interpreter used when executing
-#     a python script.
 
-#     Parameter(s):
-#     python_path (str): Path of python file to get version of intepreter used.
+def pep8_compliance(python_path):
+    """Returns whether a python file meets PEP8 standards.
 
-#     Return:
-#     version[0] (str): Version of python interpreter as a string.
-#     """
-#     inject = 'import platform\nprint(platform.python_version())\n\n'
-#     old_script = get_file_contents(python_path)
-#     new_script = inject + old_script
+    Parameter:
+    python_path (str): Path of python file to determine PEP8 compliance.
 
-#     new_path = os.path.splitext(python_path)[0] + '_inj.py'
+    Return:
+    pep8 compliance (boolean): True if PEP8 compliant, False otherwise.
+    """
+    issues = []
 
-#     with open(new_path, 'w') as f:
-#         f.write(new_script)
+    try:
+        process = subprocess.run(
+            ['pycodestyle', python_path], capture_output=True, text=True)
+        for _, line, char, descrip in re.findall("(.*):(.*):(.*): (.*)", process.stdout):
+            issue = {"line": line, "char": char, "description": descrip}
+            issues.append(issue)
+    except:
+        print('Error: unable to run pycodestyle as subprocess.')
+        return
 
-#     process = subprocess.run(['python', new_path], capture_output=True, text=True)
-#     os.remove(new_path)
-
-#     output = process.stdout
-#     version = re.search('(.*?)$', output)
-
-#     return version[0]
-
-
-# Terrible function, should get deleted ASAP
-# def get_compatible_version(python_path):
-#     """Returns compatible versions of python with a given python script.
-
-#     Parameter(s):
-#     python_path (str): Path of python file to determine compatible interpreter
-#     versions.
-
-#     Return:
-#     (bool, bool): A tuple returning the compability of the python script with
-#     the python2 interpreter and the python3 interpreter, respectively.
-#     """
-#     py2_proc = subprocess.run(['python2', python_path], capture_output=True, text=True)
-#     py3_proc = subprocess.run(['python3', python_path], capture_output=True, text=True)
-
-#     return 'python2='+str(len(py2_proc.stderr) == 0), 'python3='+str(len(py3_proc.stderr) == 0)
-
+    return len(process.stdout) == 0, issues
 
 
 def get_min_compatible_version(python_path):
     """ Returns minimum compatible python version for a given python_path file.
-    This is done by checking for features added through versions 3.0.X to
-    3.9.X.
-
-    Probably should check first for new modules that were added, as this should
-    be a foolproof way.
+    This is done by checking for features added throughout the different
+    versions of python via the Vermin module. The output of calling the Vermin
+    module is regex'd and returned as a list containing a dictionary for each
+    python file in the directory.
 
     Parameter(s):
     python_path (str): Path of python file to determine compatible interpreter
-    versions.
+    versions. Python_path may either be a python file or a directory containing
+    python files; currently only scripts ending in .py or .py3 are supported.
 
     Return:
     str: a minimum python version that works.
@@ -255,8 +209,10 @@ def get_min_compatible_version(python_path):
     version_dict = []
 
     if os.path.isdir(python_path):
-        file_paths = [os.path.join(python_path, f) for f in
-        os.listdir(python_path) if os.path.isfile(os.path.join(python_path, f))]
+        # Should probably change this for something easier to read....
+        file_paths = [os.path.join(python_path, f) for f in os.listdir(python_path) 
+        if os.path.isfile(os.path.join(python_path, f)) and os.path.join(python_path, f).endswith('.py')]
+        print(file_paths)
     else:
         file_paths = [python_path]
 
@@ -270,16 +226,16 @@ def get_min_compatible_version(python_path):
             for py2, py3, path in re.findall(f'^([~!?0-9.]*), ([~!?0-9.]*)\s*(.*)$', process.stdout, flags=re.M):
                 tmp_dict = {
                     'path': path,
-                    'py2': py2,
-                    'py3': py3
+                    'min_py2': py2,
+                    'min_py3': py3
                 }
         
             for loc, key, py2, py3 in re.findall(f'^  (L.*): (.*) requires (.*), (.*)$', process.stdout, flags=re.M):
                 issue = {
                     'location': loc,
                     'keyword': key,
-                    'min_py2': py2,
-                    'min_py3': py3
+                    'py2_implemented': py2,
+                    'py3_implemented': py3
                 }
                 details.append(issue)
                 
