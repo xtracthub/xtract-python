@@ -29,67 +29,63 @@ def curl_wrapper(url, query=None):
     buffer_contents = buffer.getvalue()
     return buffer_contents.decode('iso-8859-1')
 
+def get_last_commit_sha(owner, repo):
+    """
+    get_last_commit_sha
 
-# Grab the body of json
-# Write the API code here
-url = f'https://api.github.com/repos/{OWNER}/{REPO}/commits'
-body = curl_wrapper(url)
-body_json = json.loads(body)
+    """
+    url = f'https://api.github.com/repos/{OWNER}/{REPO}/commits'
+    body = curl_wrapper(url)
+    body_json = json.loads(body)
 
-# print(type(body))
-# print(type(body_json))
-# print(len(body_json))
+    last_commit = body_json[-1]
+    last_commit_sha = last_commit['commit']['tree']['sha']
+    return last_commit_sha
 
-# Grab the SHA of the last commit in the repo
-last_commit = body_json[-1]
-last_commit_sha = last_commit['commit']['tree']['sha']
-# print(last_commit_sha)
+def get_all_files(owner, repo, last_commit_sha):
+    """
+    get_all_files
 
-# Get the tree for a specific commit (i.e. the last one)
-# GET /repos/:owner/:repo/git/trees/:sha
-url = f'https://api.github.com/repos/{OWNER}/{REPO}/git/trees/{last_commit_sha}'
-query = {'recursive': '1'}
-tree = curl_wrapper(url, query)
-tree_json = json.loads(tree)
-print(type(tree))
-print(type(tree_json))
-
-# Add all of paths into a list
-paths = []
-for tf in tree_json['tree']:
-    paths.append(tf['path'])
-
-# print(paths)
+    """
+    url = f'https://api.github.com/repos/{OWNER}/{REPO}/git/trees/{last_commit_sha}'
+    query = {'recursive': '1'}
+    tree = curl_wrapper(url, query)
+    tree_json = json.loads(tree)
+    paths = []
+    for tree in tree_json['tree']:
+        paths.append(tree['path'])
+    return paths
 
 
+def get_all_python_files(owner, repo, last_commit_sha):
+    """
+    get_all_python_files
 
-count = 0
-python_files = []
-for path in paths:
-    if path.endswith(tuple(EXTENSIONS)):
-        python_files.append(path)
-        # print(str(count) + '\t' + path)
-        count += 1
+    """
+    all_paths = get_all_files(owner, repo, last_commit_sha)
+    python_paths = []
+    for path in all_paths:
+        if path.endswith(tuple(EXTENSIONS)):
+            python_files.append(path)
+    return python_paths
     
 
-for index, path in enumerate(python_files):
-    url = f'https://raw.githubusercontent.com/{OWNER}/{REPO}/master/{path}'
-    contents = curl_wrapper(url)
+def get_content(python_paths):
+    """
+    get_content
 
-    # print(path)
-    # print(type(path))
+    """
+    for path in python_paths:
+        url = f'https://raw.githubusercontent.com/{OWNER}/{REPO}/master/{path}'
+        contents = curl_wrapper(url)
 
-    # Quick debugging!
-    pattern = f'([^\/]*.py)'
-    file_name = re.findall(pattern, path)[0]
-    # print(file_name)
-    dir_path = re.sub(pattern, '', path)
-    # print(dir_path)
+        pattern = f'([^\/]*.py)'
+        file_name = re.findall(pattern, path)[0]
+        dir_name = re.sub(pattern, '', path)
 
-    # print(f'test_files/{REPO}/' + dir_path)
-
-    if not os.path.exists(f'test_files/{REPO}/' + dir_path):
-        os.makedirs(f'test_files/{REPO}/' + dir_path)
+        if not os.path.exists(f'test_files/{REPO}/' + dir_name):
+            os.makedirs(f'test_files/{REPO}/' + dir_name)
     
-    with open(f'test_files/{REPO}/' + dir_path + file_name, 'w+') as f:
-        f.write(contents)
+        with open(f'test_files/{REPO}/' + dir_name + file_name, 'w+') as f:
+            f.write(contents)
+        
