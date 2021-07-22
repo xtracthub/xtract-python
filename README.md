@@ -24,3 +24,5 @@ Currently supported functionality as of 07/01/2021. Documentation is provided as
  - [ ] Add return to function extraction. We include the input parameters, so why not the return parameter?
  - [ ] Find a way to test get_compilation_version and get_compatible_version. Perhaps this could be achieved by finding features that were implemented in each major version of 2.X and 3.X and ensuring that the the interpreter version is as expected.
  - [ ] Perhaps some structure that gives a quick summary of the metadata extracted? This could take the form of a dictionary.
+ - [ ] Add a usage example.
+ - [ ] Create a docker container.

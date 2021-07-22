@@ -2,6 +2,7 @@ import sys
 import os
 import unittest
 from pathlib import Path
+import json
 
 path = str(Path(Path(__file__).parent.absolute()).parent.absolute())
 sys.path.append(path)
@@ -77,20 +78,31 @@ class xtract_python_main_tests(unittest.TestCase):
 
     def num_calls_open_test(self):
         assert xpm.num_calls_open('test_files/num_calls_open_test1.py') == 13
+    
+    def get_min_compatible_version_test(self):
+        """
+        Testing methodology: test files will consist of features added to Python
+        in the major revisions, referenced from the 'What's New in Python' page
+        from the official documentation.
+        """
+        with open('expected/get_min_compatible_version_test1.txt') as file:
+            expected = file.read()
+    
+    def get_file_paths_test(self):
+        pass
+    
+# test = xtract_python_main_tests()
+# test.get_imports_test()
+# test.get_functions_test()
+# test.extract_python_test()
+# test.python_len_test()
+# test.pep8_compliance_test()
+# test.num_calls_open_test()
+# print(xpm.get_python_paths(''))
 
-
-test = xtract_python_main_tests()
-test.get_imports_test()
-test.get_functions_test()
-test.extract_python_test()
-test.python_len_test()
-test.pep8_compliance_test()
-test.num_calls_open_test()
-
-# not a good extractor method.... going to get cut
-# print(xpm.get_compilation_version('test_files/single_line.py'))
-# print(xpm.get_compatible_version('test_files/single_line.py'))
-
-x = xpm.get_min_compatible_version('test_files/')
-print(x)
-# xpm.get_min_compatible_version('test_files/pep8_compliance_test1.py')
+out = xpm.run_extractors('test_files/binance-trade-bot/binance_trade_bot')
+out = json.dumps(out, sort_keys=False, indent=4)
+out2 = xpm.run_extractors('test_files/binance-trade-bot/binance_trade_bot/models')
+out2 = json.dumps(out2, sort_keys=False, indent=2)
+# print(out)
+print(out2)

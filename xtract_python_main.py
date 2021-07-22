@@ -3,6 +3,48 @@ import subprocess
 import sys
 import os
 import pathlib
+import json
+
+EXTENSIONS = ['.py', '.py3']
+
+def get_file_paths(dir_path=None):
+    """Retrieves paths to python files in a given directory.
+
+    Parameter:
+    dir_path (str): Path of directory to get python file paths from.
+
+    Return:
+    python_paths (list): List of strings of python paths
+    """
+    if not dir_path or not os.path.isdir(dir_path):
+        dir_path = str(os.getcwd())
+        
+    file_paths = [os.path.join(dir_path, f) for f in os.listdir(dir_path) 
+    if os.path.isfile(os.path.join(dir_path, f)) and os.path.join(dir_path, f).endswith(tuple(EXTENSIONS))]
+
+    return file_paths
+
+
+def run_extractors(dir_path=None):
+    """
+    Run extractors on a list of python files.
+    """
+
+    all_extractors = lambda file_path, file_contents: dict({'comments' : get_comments(file_contents),
+                                                            'imports' : get_imports(file_contents),
+                                                            'functions' : get_functions(file_contents),
+                                                            'num_lines' : python_len(file_path),
+                                                            'num_open' : num_calls_open(file_path),
+                                                            'pep8_compliance' : pep8_compliance(file_path),
+                                                            'min_compatible_version' : get_min_compatible_version(file_path)})
+
+    bundled_metadata = dict()
+    file_paths = get_file_paths(dir_path)
+
+    for file_path in file_paths:
+        bundled_metadata[file_path] = all_extractors(file_path, get_file_contents(file_path))
+
+    return bundled_metadata
 
 
 def get_file_contents(file_path):
@@ -90,17 +132,17 @@ def get_functions(file_contents):
     return functions
 
 
-def extract_python(python_path):
+def extract_python(file_path):
     """Retrieves basic metadata from python file.
 
     Parameter:
-    python_path (str): Path of python file to retrieve metadata from.
+    file_path (str): Path of python file to retrieve metadata from.
 
     Return:
     metadata (dict): Imports and function info. from python file in the format
     {imports: {}, functions: {}}.
     """
-    file_contents = get_file_contents(python_path)
+    file_contents = get_file_contents(file_path)
     metadata = {}
 
     metadata["imports"] = get_imports(file_contents)
@@ -109,16 +151,16 @@ def extract_python(python_path):
     return metadata
 
 
-def python_len(python_path):
+def python_len(file_path):
     """Returns the number of lines in a python file.
 
     Parameter:
-    python_path (str): Path of python file to determine number of lines.
+    file_path (str): Path of python file to determine number of lines.
 
     Return:
     length (int): number of lines in a python file.
     """
-    file_contents = get_file_contents(python_path)
+    file_contents = get_file_contents(file_path)
     length = 0
 
     for i in file_contents:
@@ -128,19 +170,19 @@ def python_len(python_path):
     return length
 
 
-def num_calls_arbitrary(python_path, function):
+def num_calls_arbitrary(file_path, function):
     """Returns the number of calls to arbitrary function made by a python
     file.
 
     Parameter(s):
-    python_path (str): Path of python file to count number of calls to an
+    file_path (str): Path of python file to count number of calls to an
     arbitrary function.
     function (str): Name of the function to count number of calls to.
 
     Return:
     num_calls (int): number of calls made to a specific function.
     """
-    file_contents = get_file_contents(python_path)
+    file_contents = get_file_contents(file_path)
     pattern = r'(["\'])\1\1.*?' + function + \
         r'\(.*?\).*?\1{3}|#.*?' + function + r'\(.*?\).*?'
     stripped_file_contents = re.sub(
@@ -153,25 +195,25 @@ def num_calls_arbitrary(python_path, function):
     return num_calls
 
 
-def num_calls_open(python_path):
+def num_calls_open(file_path):
     """Returns the number of calls to the open function made by a python
     file.
 
     Parameter(s):
-    python_path (str): Path of python file to count number of calls to the
+    file_path (str): Path of python file to count number of calls to the
     open function/system call.
 
     Return:
     num_calls (int): number of calls made to a specific function.
     """
-    return num_calls_arbitrary(python_path=python_path, function='open')
+    return num_calls_arbitrary(file_path=file_path, function='open')
 
 
-def pep8_compliance(python_path):
+def pep8_compliance(file_path):
     """Returns whether a python file meets PEP8 standards.
 
     Parameter:
-    python_path (str): Path of python file to determine PEP8 compliance.
+    file_path (str): Path of python file to determine PEP8 compliance.
 
     Return:
     pep8 compliance (boolean): True if PEP8 compliant, False otherwise.
@@ -180,7 +222,7 @@ def pep8_compliance(python_path):
 
     try:
         process = subprocess.run(
-            ['pycodestyle', python_path], capture_output=True, text=True)
+            ['pycodestyle', file_path], capture_output=True, text=True)
         for _, line, char, descrip in re.findall("(.*):(.*):(.*): (.*)", process.stdout):
             issue = {"line": line, "char": char, "description": descrip}
             issues.append(issue)
@@ -191,16 +233,16 @@ def pep8_compliance(python_path):
     return len(process.stdout) == 0, issues
 
 
-def get_min_compatible_version(python_path):
-    """ Returns minimum compatible python version for a given python_path file.
+def get_min_compatible_version(file_path):
+    """ Returns minimum compatible python version for a given file_path file.
     This is done by checking for features added throughout the different
     versions of python via the Vermin module. The output of calling the Vermin
     module is regex'd and returned as a list containing a dictionary for each
     python file in the directory.
 
     Parameter(s):
-    python_path (str): Path of python file to determine compatible interpreter
-    versions. Python_path may either be a python file or a directory containing
+    file_path (str): Path of python file to determine compatible interpreter
+    versions. file_path may either be a python file or a directory containing
     python files; currently only scripts ending in .py or .py3 are supported.
 
     Return:
@@ -208,13 +250,13 @@ def get_min_compatible_version(python_path):
     """
     version_dict = []
 
-    if os.path.isdir(python_path):
+    if os.path.isdir(file_path):
         # Should probably change this for something easier to read....
-        file_paths = [os.path.join(python_path, f) for f in os.listdir(python_path) 
-        if os.path.isfile(os.path.join(python_path, f)) and os.path.join(python_path, f).endswith('.py')]
+        file_paths = [os.path.join(file_path, f) for f in os.listdir(file_path) 
+        if os.path.isfile(os.path.join(file_path, f)) and os.path.join(file_path, f).endswith('.py')]
         print(file_paths)
     else:
-        file_paths = [python_path]
+        file_paths = [file_path]
 
     try:
         for file_path in file_paths:
