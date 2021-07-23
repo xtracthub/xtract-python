@@ -91,8 +91,15 @@ class Getter(object):
     
 
     def get_content(self, python_paths):
-        """Retrieves content from GitHub
+        """Retrieves content from GitHub and copies it into appropriate
+        directory based on the directory of the GitHub repository.
 
+        Parameter:
+        python_paths (list): list of python paths (represented as strings) to
+        where the acquired code will be written.
+
+        Return:
+        None
         """
         for path in python_paths:
             url = f'https://raw.githubusercontent.com/{self.owner}/{self.repo}/master/{path}'
@@ -107,3 +114,4 @@ class Getter(object):
         
             with open(f'test_files/{self.repo}/' + dir_name + file_name, 'w+') as f:
                 f.write(contents)
+        return
