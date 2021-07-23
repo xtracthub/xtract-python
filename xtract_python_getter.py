@@ -42,8 +42,8 @@ class Getter(object):
         body = self.curl_wrapper(url)
         body_json = json.loads(body)
 
-        if isinstance(body_json, dict):
-            return body_json
+        if 'message' in body_json and body_json['message'] == 'Bad credentials':
+            return '(ERROR) Bad credentials. Create another API key.'
 
         last_commit = body_json[-1]
         last_commit_sha = last_commit['commit']['tree']['sha']
