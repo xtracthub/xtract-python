@@ -43,7 +43,8 @@ class Getter(object):
         body_json = json.loads(body)
 
         if 'message' in body_json and body_json['message'] == 'Bad credentials':
-            return '(ERROR) Bad credentials. Create another API key.'
+            print('(ERROR) Bad credentials. Create another API key.')
+            return None
 
         last_commit = body_json[-1]
         last_commit_sha = last_commit['commit']['tree']['sha']

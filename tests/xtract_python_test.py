@@ -14,7 +14,14 @@ class xtract_python_main_tests(unittest.TestCase):
         return f'cwd: {str(os.getcwd())}'
 
     def get_file_paths_test(self):
-        pass
+        with open('expected/get_file_paths_test_files.txt') as file:
+            expected = file.read()
+            output = str(xpm.get_file_paths('test_files/'))
+            assert expected == output, "test_files directory failed."
+        with open('expected/get_file_paths_tests.txt') as file:
+            expected = file.read()
+            output = str(xpm.get_file_paths('../tests'))
+            assert expected == output, "tests directory failed."
 
     def run_extractors_file_test(self):
         pass
@@ -134,3 +141,12 @@ class xtract_python_main_tests(unittest.TestCase):
         """
         with open('expected/get_min_compatible_version_test1.txt') as file:
             expected = file.read()
+        
+
+
+# t = xtract_python_main_tests()
+# m = xpm.get_file_contents('tests/test_files/multi_line.py')
+# print(m)
+
+# print(t.get_cwd())
+# print(xpm.get_file_paths('../tests/'))
