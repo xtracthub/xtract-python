@@ -140,13 +140,4 @@ class xtract_python_main_tests(unittest.TestCase):
         from the official documentation.
         """
         with open('expected/get_min_compatible_version_test1.txt') as file:
-            expected = file.read()
-        
-
-
-# t = xtract_python_main_tests()
-# m = xpm.get_file_contents('tests/test_files/multi_line.py')
-# print(m)
-
-# print(t.get_cwd())
-# print(xpm.get_file_paths('../tests/'))
+            expected = file.read(
