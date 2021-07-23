@@ -21,17 +21,26 @@ Currently supported functionality as of 07/01/2021. Documentation is provided as
 
 ## Usage Guide
 1. Import xtract_python_main.
-2. Import a code repository. Xtract-python includes a Getter object (found in xtract_python_getter) which wraps PyCurl and the GitHub API to easily extract the code from a repository without cloning it.
+2. Import a code repository. Xtract-python includes a Getter object 
+(found in xtract_python_getter) which wraps PyCurl and the GitHub API to 
+easily extract the code from a repository without cloning it.
 ---
     get = xpg.Getter(owner='edeng23', repo='binance-trade-bot')
     get.direc = 'tests/test_files/binance_trade_bot/'
     get.token='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'
 ---
+3. Once code is imported, we can call various methods in xtract_python_main;
+a user may wish acquire a list of possible python scripts for extraction, 
+using method 'get_file_paths' or skip this step and allow this to be handled
+by method 'run_extractors_dir' which automatically finds suitable scripts.
+---
+    file_paths = get_file_paths('some/directory/')
+    for file_path in file_paths:
+        metadata = run_extractors_file(file_path)
+        print(metadata)
+---
 
 ## To-Do
  - [ ] Add types for input parameters and return variables to function extraction.
  - [ ] Add return to function extraction. We include the input parameters, so why not the return parameter?
- - [ ] Find a way to test get_compilation_version and get_compatible_version. Perhaps this could be achieved by finding features that were implemented in each major version of 2.X and 3.X and ensuring that the the interpreter version is as expected.
- - [ ] Perhaps some structure that gives a quick summary of the metadata extracted? This could take the form of a dictionary.
- - [ ] Add a usage example.
- - [ ] Create a docker container.
+ - [ ] Dockerize.
