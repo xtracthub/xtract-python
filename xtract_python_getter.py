@@ -7,7 +7,7 @@ import os
 
 EXTENSIONS = ['.py', '.py3']
 
-class Tester(object):
+class Getter(object):
     def __init__(self, owner=None, repo=None, direc=None, token=None):
         self.owner = owner
         self.repo = repo
@@ -15,9 +15,8 @@ class Tester(object):
         self.token = token
 
     def curl_wrapper(self, url, query=None):
-        """
-        curl_wrapper:
-
+        """wrapper for basic pycurl functionality
+        
         """
         buffer = io.BytesIO()
         c = pycurl.Curl()
@@ -33,9 +32,11 @@ class Tester(object):
         return buffer_contents.decode('iso-8859-1')
 
     def get_last_commit_sha(self):
-        """
-        get_last_commit_sha
+        """Returns the hash of the most recent commit on a GitHub repository.
 
+        Return:
+        last_commit_sha (dict): the hash of the most recent commit on a GitHub
+        repository.
         """
         url = f'https://api.github.com/repos/{self.owner}/{self.repo}/commits'
         body = self.curl_wrapper(url)
@@ -49,9 +50,15 @@ class Tester(object):
         return last_commit_sha
 
     def get_all_files(self, last_commit_sha):
-        """
-        get_all_files
+        """Returns a list of all files in a Github Repository for a given
+        commit (specified by its hash).
 
+        Parameter:
+        last_commit_sha (dict): the hash of the most recent commit on a GitHub
+        repository.
+
+        Return:
+        paths (list): a list of all files paths in a Github repository. 
         """
         url = f'https://api.github.com/repos/{self.owner}/{self.repo}/git/trees/{last_commit_sha}'
         query = {'recursive': '1'}
@@ -64,9 +71,15 @@ class Tester(object):
 
 
     def get_all_python_files(self, last_commit_sha):
-        """
-        get_all_python_files
+        """Returns a list of all python files in a Github Repository for a 
+        given commit (specified by its hash).
 
+        Parameter:
+        last_commit_sha (dict): the hash of the most recent commit on a GitHub
+        repository.
+
+        Return:
+        paths (list): a list of all python paths in a Github repository.
         """
         all_paths = self.get_all_files(last_commit_sha)
         python_paths = []
@@ -77,8 +90,7 @@ class Tester(object):
     
 
     def get_content(self, python_paths):
-        """
-        get_content
+        """Retrieves content from GitHub
 
         """
         for path in python_paths:
@@ -94,8 +106,3 @@ class Tester(object):
         
             with open(f'test_files/{self.repo}/' + dir_name + file_name, 'w+') as f:
                 f.write(contents)
-
-test = Tester(owner='edeng23', repo='binance-trade-bot', direc='test_files/binance_trade_bot/', token='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')
-last_commit_sha = test.get_last_commit_sha()
-python_paths = test.get_all_python_files(last_commit_sha)
-test.get_content(python_paths)

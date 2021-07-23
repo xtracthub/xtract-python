@@ -1,13 +1,10 @@
+import os
 import re
 import subprocess
-import sys
-import os
-import pathlib
-import json
 
 EXTENSIONS = ['.py', '.py3']
 
-def get_file_paths(dir_path=None):
+def get_file_paths(dir_path):
     """Retrieves paths to python files in a given directory.
 
     Parameter:
@@ -16,33 +13,53 @@ def get_file_paths(dir_path=None):
     Return:
     python_paths (list): List of strings of python paths
     """
-    if not dir_path or not os.path.isdir(dir_path):
-        dir_path = str(os.getcwd())
-        
     file_paths = [os.path.join(dir_path, f) for f in os.listdir(dir_path) 
     if os.path.isfile(os.path.join(dir_path, f)) and os.path.join(dir_path, f).endswith(tuple(EXTENSIONS))]
 
     return file_paths
 
+def run_extractors_file(file_path):
+    """Runs all extractors on a file and returns a dictionary containing a
+    bundle of metadata.
 
-def run_extractors(dir_path=None):
+    Parameter:
+    file_path (str): Path of file to run extractors on.
+
+    Return:
+    metadata (dict): Dictionary containing outputs from each of the executed
+    extractors.
     """
-    Run extractors on a list of python files.
+    file_contents = get_file_contents(file_path)
+
+    return dict({'comments' : get_comments(file_contents),
+                'imports' : get_imports(file_contents), 
+                'functions' : get_functions(file_contents),
+                'num_lines' : python_len(file_contents),
+                'num_open' : num_calls_open(file_contents),
+                'pep8_compliance' : pep8_compliance(file_path),
+                'min_compatible_version' : get_min_compatible_version(file_path)})
+
+
+def run_extractors_dir(dir_path=None):
+    """Runs all extractors on all files in a given directory, and returns a
+    dictionary containing a metadata entry for each individual file. Note that
+    subdirectories are not included.
+
+    Parameter:
+    file_path (str): Path of directory to run extractors on.
+
+    Return:
+    metadata (dict): Dictionary containing outputs from each of the executed
+    extractors on each of the individual files.
     """
+    if not dir_path:
+        dir_path = str(os.getcwd())
 
-    all_extractors = lambda file_path, file_contents: dict({'comments' : get_comments(file_contents),
-                                                            'imports' : get_imports(file_contents),
-                                                            'functions' : get_functions(file_contents),
-                                                            'num_lines' : python_len(file_path),
-                                                            'num_open' : num_calls_open(file_path),
-                                                            'pep8_compliance' : pep8_compliance(file_path),
-                                                            'min_compatible_version' : get_min_compatible_version(file_path)})
-
-    bundled_metadata = dict()
     file_paths = get_file_paths(dir_path)
-
+    bundled_metadata = dict()
+    
     for file_path in file_paths:
-        bundled_metadata[file_path] = all_extractors(file_path, get_file_contents(file_path))
+        bundled_metadata[file_path] = run_extractors_file(file_path, get_file_contents(file_path))
 
     return bundled_metadata
 
@@ -58,14 +75,13 @@ def get_file_contents(file_path):
     """
     with open(file_path) as f:
         file_contents = f.read()
-
     return file_contents
 
 
 def get_comments(file_contents):
     """Retrieves comments in a python file. Note that technically multi-line
-    strings are not 'comments' per PEP8, but they will be considered as such
-    for the purposes of this extractor.
+    strings are not 'comments' per PEP8 style guide, but they will be 
+    considered as such for the purposes of this extractor.
 
     Parameter:
     file_contents (str): Contents of python file.
@@ -74,7 +90,6 @@ def get_comments(file_contents):
     comments (arr): an array of comments
     """
     comments = []
-
     for quote, comment in re.findall(r'([\'"])\1\1(.*?)\1{3}', file_contents, re.DOTALL):
         comments.append(comment.strip())
 
@@ -132,7 +147,7 @@ def get_functions(file_contents):
     return functions
 
 
-def extract_python(file_path):
+def extract_python(file_contents):
     """Retrieves basic metadata from python file.
 
     Parameter:
@@ -142,7 +157,6 @@ def extract_python(file_path):
     metadata (dict): Imports and function info. from python file in the format
     {imports: {}, functions: {}}.
     """
-    file_contents = get_file_contents(file_path)
     metadata = {}
 
     metadata["imports"] = get_imports(file_contents)
@@ -151,7 +165,7 @@ def extract_python(file_path):
     return metadata
 
 
-def python_len(file_path):
+def python_len(file_contents):
     """Returns the number of lines in a python file.
 
     Parameter:
@@ -160,7 +174,6 @@ def python_len(file_path):
     Return:
     length (int): number of lines in a python file.
     """
-    file_contents = get_file_contents(file_path)
     length = 0
 
     for i in file_contents:
@@ -170,7 +183,7 @@ def python_len(file_path):
     return length
 
 
-def num_calls_arbitrary(file_path, function):
+def num_calls_arbitrary(file_contents, function):
     """Returns the number of calls to arbitrary function made by a python
     file.
 
@@ -182,7 +195,6 @@ def num_calls_arbitrary(file_path, function):
     Return:
     num_calls (int): number of calls made to a specific function.
     """
-    file_contents = get_file_contents(file_path)
     pattern = r'(["\'])\1\1.*?' + function + \
         r'\(.*?\).*?\1{3}|#.*?' + function + r'\(.*?\).*?'
     stripped_file_contents = re.sub(
@@ -195,7 +207,7 @@ def num_calls_arbitrary(file_path, function):
     return num_calls
 
 
-def num_calls_open(file_path):
+def num_calls_open(file_contents):
     """Returns the number of calls to the open function made by a python
     file.
 
@@ -206,11 +218,11 @@ def num_calls_open(file_path):
     Return:
     num_calls (int): number of calls made to a specific function.
     """
-    return num_calls_arbitrary(file_path=file_path, function='open')
+    return num_calls_arbitrary(file_contents, function='open')
 
 
 def pep8_compliance(file_path):
-    """Returns whether a python file meets PEP8 standards.
+    """Returns whether a python file meets PEP8 style guide.
 
     Parameter:
     file_path (str): Path of python file to determine PEP8 compliance.
@@ -234,9 +246,9 @@ def pep8_compliance(file_path):
 
 
 def get_min_compatible_version(file_path):
-    """ Returns minimum compatible python version for a given file_path file.
+    """Returns minimum compatible python version for a given file_path file.
     This is done by checking for features added throughout the different
-    versions of python via the Vermin module. The output of calling the Vermin
+    versions of python via the Vermin module. The output of calling the vermin
     module is regex'd and returned as a list containing a dictionary for each
     python file in the directory.
 
@@ -246,15 +258,14 @@ def get_min_compatible_version(file_path):
     python files; currently only scripts ending in .py or .py3 are supported.
 
     Return:
-    str: a minimum python version that works.
+    version_dict (dict): a dictionary containing the vermin output for each
+    individual file in a directory.
     """
     version_dict = []
 
-    if os.path.isdir(file_path):
-        # Should probably change this for something easier to read....
+    if os.isdir(file_path):
         file_paths = [os.path.join(file_path, f) for f in os.listdir(file_path) 
-        if os.path.isfile(os.path.join(file_path, f)) and os.path.join(file_path, f).endswith('.py')]
-        print(file_paths)
+        if os.path.isfile(os.path.join(file_path, f)) and os.path.join(file_path, f).endswith(tuple(EXTENSIONS))]
     else:
         file_paths = [file_path]
 
