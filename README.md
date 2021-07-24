@@ -43,4 +43,3 @@ by method 'run_extractors_dir' which automatically finds suitable scripts.
 ## To-Do
  - [ ] Add types for input parameters and return variables to function extraction.
  - [ ] Add return to function extraction. We include the input parameters, so why not the return parameter?
- - [ ] Dockerize.
