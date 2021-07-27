@@ -16,8 +16,7 @@ Currently supported functionality as of 07/01/2021. Documentation is provided as
 |pep8_compliance|Returns PEP8 compliance of a python script, along with an array of issues found, if any.
 |num_calls_arbitrary|Returns the number of calls made to any arbitrary function.
 |num_calls_open|Returns the number of calls made to the open() syscall.
-|get_compilation_version|Returns the version that a python script is interpreted with at runtime.
-|get_compatible_version|Returns a tuple of versions of python interpreters that are compatible with a given python script.
+|get_min_compatible_version|Returns a tuple of versions of python interpreters that are compatible with a given python script.
 
 ## Usage Guide
 1. Import xtract_python_main.
