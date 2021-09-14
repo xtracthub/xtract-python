@@ -1,8 +1,18 @@
+import time
 import os
 import re
 import subprocess
 
 EXTENSIONS = ['.py', '.py3']
+
+def execute_extractor(filename):
+    t0 = time.time()
+    if not filename:
+        return None
+    metadata = run_extractors_file(file_path=filename)
+    t1 = time.time()
+    metadata.update({"extract time": (t1 - t0)})
+    return metadata
 
 def get_file_paths(dir_path):
     """Retrieves paths to python files in a given directory.
