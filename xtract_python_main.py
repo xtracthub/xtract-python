@@ -273,7 +273,7 @@ def get_min_compatible_version(file_path):
     """
     version_dict = []
 
-    if os.isdir(file_path):
+    if os.path.isdir(file_path):
         file_paths = [os.path.join(file_path, f) for f in os.listdir(file_path) 
         if os.path.isfile(os.path.join(file_path, f)) and os.path.join(file_path, f).endswith(tuple(EXTENSIONS))]
     else:
