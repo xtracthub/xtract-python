@@ -2,6 +2,8 @@ import time
 import os
 import re
 import subprocess
+import argparse
+
 
 EXTENSIONS = ['.py', '.py3']
 
@@ -308,3 +310,25 @@ def get_min_compatible_version(file_path):
     except:
         print('Error: unable to run Vermin as subprocess.')
         return
+
+if __name__ == "__main__":
+    """Takes file paths from command line and returns metadata.
+
+    Arguments:
+    --path (File path): File path of .csv file.
+
+    Returns:
+    meta (insert type here): Metadata of .csv file.
+    t1 - t0 (float): Time it took to retrieve .csv metadata.
+    """
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--path', help='File system path to file.',
+                        required=True)
+    
+    args = parser.parse_args()
+
+    meta = execute_extractor(args.path)
+    print(meta)
+
+
