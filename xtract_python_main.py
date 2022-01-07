@@ -43,13 +43,24 @@ def run_extractors_file(file_path):
     """
     file_contents = get_file_contents(file_path)
 
-    return dict({'comments' : get_comments(file_contents),
-                'imports' : get_imports(file_contents), 
-                'functions' : get_functions(file_contents),
-                'num_lines' : python_len(file_contents),
+    comments = get_comments(file_contents)
+    imports = get_imports(file_contents)
+    functions = get_functions(file_contents)
+    num_lines =  python_len(file_contents)
+
+    pep8 = None
+    compatible_version = None
+    if num_lines > 4 and len(imports) > 0: 
+        pep8 = pep8_compliance(file_path)
+        compatible_version = get_min_compatible_version(file_path)
+
+    return dict({'comments' : comments,
+                'imports' : imports, 
+                'functions' : functions,
+                'num_lines' : num_lines,
                 'num_open' : num_calls_open(file_contents),
-                'pep8_compliance' : pep8_compliance(file_path),
-                'min_compatible_version' : get_min_compatible_version(file_path)})
+                'pep8_compliance' : pep8,
+                'min_compatible_version' : compatible_version})
 
 
 def run_extractors_dir(dir_path=None):
