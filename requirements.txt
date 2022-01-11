@@ -3,4 +3,5 @@ pycodestyle==2.7.0
 vermin==1.2.1
 funcx
 funcx_endpoint
-xtract_sdk==0.0.7a6
+xtract_sdk==0.0.7a11
+numpy
